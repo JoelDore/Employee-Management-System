@@ -54,13 +54,13 @@ function runApp() {
                 break;
             // Views
             case "View All Employees":
-                viewAll()
+                viewAllEmployees()
                 break;
             case "View Employees By Role":
-                viewByRole()
+                viewEmployeesByRole()
                 break;
             case "View Employees By Department":
-                viewByDepartment()
+                viewEmployeesByDepartment()
                 break;
             // Updates
             case "Update an Employee's Role":
@@ -166,19 +166,32 @@ function addDepartment() {
 }
 
 // VIEW
-function viewEmployee() {
+function viewAllEmployees() {
+    const query = `
+    SELECT e.id, e.first_name, e.last_name, title, name AS department, 
+        salary, CONCAT(m.first_name, ' ', m.last_name) AS manager
+    FROM employees e  
+        LEFT JOIN roles
+        ON e.role_id = roles.id
+            LEFT JOIN departments
+            ON roles.department_id = departments.id
+                LEFT JOIN employees m
+                ON e.manager_id = m.id
+    `
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        console.table('\n', res, '\n')
+        runApp()
+    });
+}
+
+function viewEmployeesByRole() {
     // query db
     // cTable res
     runApp()
 }
 
-function viewRole() {
-    // query db
-    // cTable res
-    runApp()
-}
-
-function viewDepartment() {
+function viewEmployeesByDepartment() {
     // query db
     // cTable res
     runApp()
