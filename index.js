@@ -46,10 +46,10 @@ function runApp() {
             case "Add an Employee":
                 addEmployee()
                 break;
-            case "Add an Role":
+            case "Add a Role":
                 addRole()
                 break;
-            case "Add an Department":
+            case "Add a Department":
                 addDepartment()
                 break;
             // Views
@@ -74,11 +74,8 @@ function runApp() {
     });
 }
 
-// ADD 
-
-// ✔️
+// ✔️ ADD
 function addEmployee() {
-    const roles = getRoles();
     const employees = getEmployees();
     employees.unshift({ name: "No Manager", value: null })
     inquirer.prompt([
@@ -96,7 +93,7 @@ function addEmployee() {
             type: 'list',
             name: 'role_id',
             message: 'Role:',
-            choices: roles
+            choices: getRoles()
         },
         {
             type: 'list',
@@ -113,14 +110,13 @@ function addEmployee() {
         )
         connection.query('INSERT INTO employees SET ?', newEmployee, (err, res) => {
             if (err) throw err
-            console.log(`Added 1 employee`)
+            console.log(`Added new employee: ${newEmployee.first_name} ${newEmployee.last_name}`)
             runApp()
         })
     });
 }
 
 function addRole() {
-    // Get avail. depts
     inquirer.prompt([
         {
             type: 'input',
@@ -136,11 +132,19 @@ function addRole() {
             type: 'list',
             name: 'department_id',
             message: 'Department:',
-            choices: [] // Departments
+            choices: getDepartments()
         }
     ]).then(answers => {
-        // Add role to db
-        runApp()
+        const newRole = new Role(
+            answers.title,
+            answers.salary,
+            answers.department_id
+        )
+        connection.query('INSERT INTO roles SET ?', newRole, (err, res) => {
+            if (err) throw err
+            console.log(`Added new role: ${newRole.title}`)
+            runApp()
+        })
     });
 }
 
@@ -152,8 +156,12 @@ function addDepartment() {
             message: 'Department Name:'
         }
     ]).then(answers => {
-        // Add dept to db
-        runApp()
+        const newDept = new Department(answers.name)
+        connection.query('INSERT INTO departments SET ?', newDept, (err, res) => {
+            if (err) throw err;
+            console.log(`Added new department: ${newDept.name}`)
+            runApp()
+        });
     });
 }
 
@@ -225,7 +233,7 @@ function getRoles() {
 
 function getDepartments() {
     let depts = [];
-    connection.query('SELECT name, id FROM departments', (err, res) => {
+    connection.query('SELECT * FROM departments', (err, res) => {
         if (err) throw err;
         res.forEach(r => depts.push({ name: r.name, value: r.id }));
     });
