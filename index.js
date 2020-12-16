@@ -9,7 +9,8 @@ const connection = mysql.createConnection({
     port: process.env.PORT || 3306,
     user: 'root',
     password: process.env.password,
-    database: process.env.db
+    database: process.env.db,
+    multipleStatements: true
 });
 
 connection.connect(err => {
@@ -110,7 +111,7 @@ function addEmployee() {
         )
         connection.query('INSERT INTO employees SET ?', newEmployee, (err, res) => {
             if (err) throw err
-            console.log(`Added new employee: ${newEmployee.first_name} ${newEmployee.last_name}`)
+            console.log(`\nAdded new employee: ${newEmployee.first_name} ${newEmployee.last_name}\n`)
             runApp()
         })
     });
@@ -142,7 +143,7 @@ function addRole() {
         )
         connection.query('INSERT INTO roles SET ?', newRole, (err, res) => {
             if (err) throw err
-            console.log(`Added new role: ${newRole.title}`)
+            console.log(`\nAdded new role: ${newRole.title}\n`)
             runApp()
         })
     });
@@ -159,13 +160,13 @@ function addDepartment() {
         const newDept = new Department(answers.name)
         connection.query('INSERT INTO departments SET ?', newDept, (err, res) => {
             if (err) throw err;
-            console.log(`Added new department: ${newDept.name}`)
+            console.log(`\nAdded new department: ${newDept.name}\n`)
             runApp()
         });
     });
 }
 
-// VIEW
+// ✔️ VIEW
 function viewAllEmployees({ roleID, deptID }) {
     let query = `
     SELECT e.id, e.first_name, e.last_name, title, name AS department, 
@@ -227,26 +228,40 @@ function viewEmployeesByDepartment() {
 }
 
 
-// UPDATE
+// ✔️ UPDATE
 function updateEmployeeRole() {
-    // Get all employees
-    // Get avail. roles
     inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'delay',
+            message: 'Press enter to continue'
+        },
         {
             type: 'list',
             name: 'employee',
             message: 'Select an Employee to update:',
-            choices: [] // Employees
+            choices: getEmployees()
         },
         {
             type: 'list',
             name: 'newRole',
             message: 'Choose a new role:',
-            choices: [] // Roles
+            choices: getRoles()
         }
     ]).then(answers => {
-        // Update employee in db
-        runApp()
+        const newRole = { role_id: answers.newRole }
+        const employeeID = { id: answers.employee }
+        const query = `
+        UPDATE employees SET ? WHERE ?; 
+        SELECT CONCAT(first_name, ' ', last_name) AS name FROM employees
+        WHERE ?
+        `
+        connection.query(query, [newRole, employeeID, employeeID], (err, res) => {
+            if (err) throw err;
+            console.log(`\nUpdated ${res[1][0].name}'s role\n`)
+            runApp()
+        }
+        );
     });
 }
 
