@@ -166,8 +166,8 @@ function addDepartment() {
 }
 
 // VIEW
-function viewAllEmployees() {
-    const query = `
+function viewAllEmployees({ roleID, deptID }) {
+    let query = `
     SELECT e.id, e.first_name, e.last_name, title, name AS department, 
         salary, CONCAT(m.first_name, ' ', m.last_name) AS manager
     FROM employees e  
@@ -176,8 +176,11 @@ function viewAllEmployees() {
             LEFT JOIN departments
             ON roles.department_id = departments.id
                 LEFT JOIN employees m
-                ON e.manager_id = m.id
+                ON e.manager_id = m.id 
     `
+    if (roleID) query += `WHERE e.role_id = ${roleID}`
+    else if (deptID) query += `WHERE department_id = ${deptID}`
+
     connection.query(query, (err, res) => {
         if (err) throw err;
         console.table('\n', res, '\n')
@@ -186,15 +189,41 @@ function viewAllEmployees() {
 }
 
 function viewEmployeesByRole() {
-    // query db
-    // cTable res
-    runApp()
+    const roles = getRoles()
+    inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'delay',
+            message: 'Press enter to continue'
+        },
+        {
+            type: 'list',
+            name: 'roleID',
+            message: 'Choose a role:',
+            choices: roles
+        }
+    ]).then(answers => {
+        viewAllEmployees({ roleID: answers.roleID })
+    });
 }
 
 function viewEmployeesByDepartment() {
-    // query db
-    // cTable res
-    runApp()
+    const depts = getDepartments()
+    inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'delay',
+            message: 'Press enter to continue'
+        },
+        {
+            type: 'list',
+            name: 'deptID',
+            message: 'Choose a department:',
+            choices: depts
+        }
+    ]).then(answers => {
+        viewAllEmployees({ deptID: answers.deptID })
+    });
 }
 
 
