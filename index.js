@@ -78,8 +78,9 @@ function runApp() {
 
 // ✔️
 function addEmployee() {
-    // Get employees (to assign manager)
-    // Get avail. roles
+    const roles = getRoles();
+    const employees = getEmployees();
+    employees.unshift({ name: "No Manager", value: null })
     inquirer.prompt([
         {
             type: 'input',
@@ -110,8 +111,11 @@ function addEmployee() {
             answers.role_id,
             answers.manager_id
         )
-        // Add employee to db
-        runApp()
+        connection.query('INSERT INTO employees SET ?', newEmployee, (err, res) => {
+            if (err) throw err
+            console.log(`Added 1 employee`)
+            runApp()
+        })
     });
 }
 
@@ -194,4 +198,36 @@ function updateEmployeeRole() {
         // Update employee in db
         runApp()
     });
+}
+
+
+// ✔️ GETTERS 
+function getEmployees() {
+    let employees = [];
+    connection.query('SELECT * FROM employees', (err, res) => {
+        if (err) throw err;
+        res.forEach(r => {
+            const fullName = `${r.first_name} ${r.last_name}`
+            employees.push({ name: fullName, value: r.id })
+        });
+    });
+    return employees
+}
+
+function getRoles() {
+    let roles = [];
+    connection.query('SELECT * FROM roles', (err, res) => {
+        if (err) throw err;
+        res.forEach(r => roles.push({ name: r.title, value: r.id }));
+    });
+    return roles;
+}
+
+function getDepartments() {
+    let depts = [];
+    connection.query('SELECT name, id FROM departments', (err, res) => {
+        if (err) throw err;
+        res.forEach(r => depts.push({ name: r.name, value: r.id }));
+    });
+    return depts;
 }
