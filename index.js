@@ -167,7 +167,7 @@ function addDepartment() {
 }
 
 // ✔️ VIEW
-function viewAllEmployees({ roleID, deptID }) {
+function viewAllEmployees(roleID = '', deptID = '') {
     let query = `
     SELECT e.id, e.first_name, e.last_name, title, name AS department, 
         salary, CONCAT(m.first_name, ' ', m.last_name) AS manager
@@ -204,7 +204,7 @@ function viewEmployeesByRole() {
             choices: roles
         }
     ]).then(answers => {
-        viewAllEmployees({ roleID: answers.roleID })
+        viewAllEmployees(answers.roleID)
     });
 }
 
@@ -223,7 +223,7 @@ function viewEmployeesByDepartment() {
             choices: depts
         }
     ]).then(answers => {
-        viewAllEmployees({ deptID: answers.deptID })
+        viewAllEmployees('', answers.deptID)
     });
 }
 
