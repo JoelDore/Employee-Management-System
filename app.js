@@ -7,9 +7,14 @@ const mysql = require('mysql');
 const connection = mysql.createConnection({
     host: 'localhost',
     port: process.env.PORT || 3306,
+
+    // Your username:
     user: 'root',
+
+    // Your password:
     password: process.env.password,
-    database: process.env.db,
+
+    database: process.env.db || 'company_DB',
     multipleStatements: true
 });
 
