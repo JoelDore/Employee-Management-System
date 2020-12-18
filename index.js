@@ -1,8 +1,8 @@
 require('dotenv').config()
+require('console.table')
 const { Department, Role, Employee } = require('./lib/classes')
 const inquirer = require('inquirer')
 const mysql = require('mysql');
-const cTable = require('console.table')
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -19,7 +19,7 @@ connection.connect(err => {
     runApp()
 });
 
-// ✔️ START APP
+// START APP
 function runApp() {
     inquirer.prompt([
         {
@@ -27,13 +27,13 @@ function runApp() {
             name: 'choice',
             message: 'What would you like to do?',
             choices: [
-                "Add an Employee",
-                "Add a Role",
-                "Add a Department",
-                new inquirer.Separator(),
                 "View All Employees",
                 "View Employees By Role",
                 "View Employees By Department",
+                new inquirer.Separator(),
+                "Add New Employee",
+                "Add New Role",
+                "Add New Department",
                 new inquirer.Separator(),
                 "Update an Employee's Role",
                 new inquirer.Separator(),
@@ -44,13 +44,13 @@ function runApp() {
     ]).then(answers => {
         switch (answers.choice) {
             // Adds
-            case "Add an Employee":
+            case "Add New Employee":
                 addEmployee()
                 break;
-            case "Add a Role":
+            case "Add New Role":
                 addRole()
                 break;
-            case "Add a Department":
+            case "Add New Department":
                 addDepartment()
                 break;
             // Views
@@ -75,7 +75,7 @@ function runApp() {
     });
 }
 
-// ✔️ ADD
+// ADD
 function addEmployee() {
     const employees = getEmployees();
     employees.unshift({ name: "No Manager", value: null })
@@ -83,12 +83,16 @@ function addEmployee() {
         {
             type: 'input',
             name: 'first_name',
-            message: 'First Name:'
+            message: 'First Name:',
+            validate: input => (input && isNaN(input)) ? true
+                : 'Please enter a valid first name'
         },
         {
             type: 'input',
             name: 'last_name',
-            message: 'Last Name:'
+            message: 'Last Name:',
+            validate: input => (input && isNaN(input)) ? true
+                : 'Please enter a valid last name'
         },
         {
             type: 'list',
@@ -99,7 +103,7 @@ function addEmployee() {
         {
             type: 'list',
             name: 'manager_id',
-            message: 'Assign a manager?',
+            message: 'Assign a manager',
             choices: employees
         }
     ]).then(answers => {
@@ -111,7 +115,7 @@ function addEmployee() {
         )
         connection.query('INSERT INTO employees SET ?', newEmployee, (err, res) => {
             if (err) throw err
-            console.log(`\nAdded new employee: ${newEmployee.first_name} ${newEmployee.last_name}\n`)
+            console.log(`\n Added new employee: ${newEmployee.first_name} ${newEmployee.last_name} \n`)
             runApp()
         })
     });
@@ -122,12 +126,18 @@ function addRole() {
         {
             type: 'input',
             name: 'title',
-            message: 'Title:'
+            message: 'Title:',
+            validate: input => input ? true
+                : 'Please enter a title for new role'
         },
         {
-            type: 'number',
+            type: 'input',
             name: 'salary',
-            message: 'Salary:'
+            message: 'Salary:',
+            validate: input => {
+                if (!input || isNaN(input) || input < 0) return 'Please enter a valid (numerical) salary'
+                return true
+            }
         },
         {
             type: 'list',
@@ -143,7 +153,7 @@ function addRole() {
         )
         connection.query('INSERT INTO roles SET ?', newRole, (err, res) => {
             if (err) throw err
-            console.log(`\nAdded new role: ${newRole.title}\n`)
+            console.log(`\n Added new role: ${newRole.title} \n`)
             runApp()
         })
     });
@@ -154,19 +164,26 @@ function addDepartment() {
         {
             type: 'input',
             name: 'name',
-            message: 'Department Name:'
+            message: 'Department Name:',
+            validate: input => input ? true
+                : 'Please enter a department name'
         }
     ]).then(answers => {
         const newDept = new Department(answers.name)
         connection.query('INSERT INTO departments SET ?', newDept, (err, res) => {
             if (err) throw err;
-            console.log(`\nAdded new department: ${newDept.name}\n`)
+            console.log(`\n Added new department: ${newDept.name} \n`)
             runApp()
         });
     });
 }
 
-// ✔️ VIEW
+// VIEW
+
+/**
+ * @param roleID (optional) filter employees by role_id
+ * @param deptID (optional) filter employees by department_id 
+ */
 function viewAllEmployees(roleID = '', deptID = '') {
     let query = `
     SELECT e.id, e.first_name, e.last_name, title, name AS department, 
@@ -184,8 +201,9 @@ function viewAllEmployees(roleID = '', deptID = '') {
 
     connection.query(query, (err, res) => {
         if (err) throw err;
-        console.table('\n', res, '\n')
-        runApp()
+        console.table(res)
+        // Delay menu prompt slightly to ensure user sees result
+        setTimeout(() => runApp(), 2000);
     });
 }
 
@@ -228,7 +246,7 @@ function viewEmployeesByDepartment() {
 }
 
 
-// ✔️ UPDATE
+// UPDATE
 function updateEmployeeRole() {
     inquirer.prompt([
         {
@@ -258,7 +276,7 @@ function updateEmployeeRole() {
         `
         connection.query(query, [newRole, employeeID, employeeID], (err, res) => {
             if (err) throw err;
-            console.log(`\nUpdated ${res[1][0].name}'s role\n`)
+            console.log(`\n Updated ${res[1][0].name}'s role \n`)
             runApp()
         }
         );
@@ -266,7 +284,7 @@ function updateEmployeeRole() {
 }
 
 
-// ✔️ GETTERS 
+// SELECT (for Inquirer list prompts)
 function getEmployees() {
     let employees = [];
     connection.query('SELECT * FROM employees', (err, res) => {
