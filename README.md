@@ -18,12 +18,13 @@
 * [Questions](#Questions)
 
 ## Features
-- Add new employees, roles, departments to company
+- Add new employees, roles, and departments to a company
+- Assign new employees a manager
 - View all employees, or filter view by role or department
 - Update an employee's role
 
 ## Installation
-1. Install npm packages `Inquirer`, `Mysql`, optional `console.table`:
+1. Install npm packages: `Inquirer`, `Mysql`, optional `console.table`
     ```
     npm i inquirer
     npm i mysql
@@ -34,7 +35,7 @@
 3. *Make sure to update the `app.js` file with your MySQL username & password*
 
 ## Usage
-<!-- - -> **[Walkthrough Video](#)** <-- -->
+--> **[Walkthrough Video](https://drive.google.com/file/d/1YmtQGAarwuohKTDqzHEr7W5HkDdTaS89/view)** <--
 1. Run `node app` in terminal  
 2. Select an option from the menu & follow prompts to view or manage items in the company database
 3. Select `Exit` on main menu to exit the app
