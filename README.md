@@ -1,4 +1,4 @@
-# Title
+# Employee Management System
 <div>
 <img src='https://img.shields.io/github/license/joeldore/Employee-Management-System'>  
 <img src='https://img.shields.io/github/repo-size/joeldore/Employee-Management-System'>  
@@ -24,21 +24,33 @@
 - Update an employee's role
 
 ## Installation
-1. Install npm packages: `Inquirer`, `Mysql`, optional `console.table`
+1. Download project by clicking 
+![Code button](https://img.shields.io/badge/-%E2%A4%93%20Code%20%E2%8F%B7-brightgreen)
+at the top of this repository, and open project directory in terminal.
+2. Install npm packages: `Inquirer`, `Mysql`, optional `console.table`
     ```
     npm i inquirer
     npm i mysql
     npm i console.table
     ```
-2. Create database in MySQL using the provided [schema](./data/Company-Schema.sql) located in `data` directory
-    * Prepopulate with data from [seed.sql](./data/seed.sql) file (optional)
-3. *Make sure to update the `app.js` file with your MySQL username & password*
+3. Create database in MySQL using the provided [schema](./data/Company-Schema.sql) located in `data` directory
+    * (optional): Prepopulate with data from [seed.sql](./data/seed.sql) file.  
+      You may add your company's existing data in this file using the given models, or [via the app](#Usage))
+    ```
+    mysql -u [your username] -p
+    [enter password]
+    source ./data/Company-Schema.sql
+    source ./data/seed.sql (optional)
+    exit
+    ```
+4. *Make sure to update the `app.js` file with your MySQL username & password*
 
 ## Usage
---> **[Walkthrough Video](https://drive.google.com/file/d/1YmtQGAarwuohKTDqzHEr7W5HkDdTaS89/view)** <--
+--> **[Walkthrough Video](https://drive.google.com/file/d/1YKAR7jxQEEtiJoE6DzsT2JVmylAC5lEo/view)** <--
 1. Run `node app` in terminal  
 2. Select an option from the menu & follow prompts to view or manage items in the company database
-3. Select `Exit` on main menu to exit the app
+3. Select `Exit` on main menu to exit the app  
+![Demo](./assets/demo.gif)
 
 ## Contributing
 Contributions welcome!
